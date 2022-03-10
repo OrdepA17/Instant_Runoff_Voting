@@ -14,6 +14,10 @@ public class Election {
 	
 	public static void main(String[] args) {
 		/*TODO CALL THE FUNCTION THAT BEGINS YOUR PROGRAM*/
+		//this is for a test commit and push to test that everything is properly linked
+		
+		
+		
 	}
 	
 }
