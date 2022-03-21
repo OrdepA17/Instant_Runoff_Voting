@@ -1,9 +1,9 @@
-package dataStructures;
+package dataStructures.List;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class singlyLinkedLists <E> implements List <E> {
+public class SinglyLinkedLists <E> implements List <E> {
 	
 	@SuppressWarnings("hiding")
 	private class Node <E>{
@@ -70,7 +70,7 @@ public class singlyLinkedLists <E> implements List <E> {
 	private Node<E> header;
 	private int currentSize;
 	
-public singlyLinkedLists() {
+public SinglyLinkedLists() {
 	header = new Node<>();
 	currentSize = 0;
 }

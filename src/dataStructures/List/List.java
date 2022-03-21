@@ -1,4 +1,4 @@
-package dataStructures;
+package dataStructures.List;
 
 public interface List<E> extends Iterable<E>{
 	
