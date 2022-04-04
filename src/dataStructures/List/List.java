@@ -2,10 +2,10 @@ package dataStructures.List;
 
 public interface List<E> extends Iterable<E>{
 	
-	public void add(E elm);
+	public boolean add(E elm);
 	public void add( int index, E elm);
 	public boolean remove(E elm);
-	public boolean remove(int index);
+	public E remove(int index);
 	public int removeAll(E elm);
 	public void clear();
 	public boolean contains(E elm);

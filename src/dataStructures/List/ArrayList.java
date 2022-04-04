@@ -6,9 +6,10 @@ import java.util.NoSuchElementException;
 public class ArrayList<E> implements List<E>{
 
 	private E[] elements;
-	private int currentSize;
+	private int capacity;
+	private int size = 0;
 	
-	private static final int DEFAULT_SIZE = 25;
+	private static final int DEFAULT_CAPACITY = 25;
 	
 	@SuppressWarnings("hiding")
 	private class ArrayListIterator<E> implements Iterator<E>{
@@ -37,35 +38,32 @@ public class ArrayList<E> implements List<E>{
 	
 	
 	@SuppressWarnings("unchecked")
-	public ArrayList(int initialCapacity) {
-		if(initialCapacity < 1)
-			throw new IllegalArgumentException("Size must be at least 1");
+	public ArrayList() {
 		
-		currentSize = 0;
-		elements = (E[]) new Object[initialCapacity];
+		capacity = DEFAULT_CAPACITY;
+		elements = (E[]) new Object[capacity];
 		
 	}
 	
-	public ArrayList() {
-		this(DEFAULT_SIZE);
+	public ArrayList(ArrayList<E> toCopy) {
+		elements = toCopy.elements;
+		capacity = toCopy.capacity;
+		size = toCopy.size;
 	}
 
 	@Override
-	public void add(E elm) {
+	public boolean add(E elm) {
 		
-		if(currentSize == elements.length)
-			reAllocate();
-		
-		elements[currentSize] = elm;
-		currentSize++;
+		add(size,elm);
+		return true;
 		
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void reAllocate() {
-		E[] newElements = (E[]) new Object[currentSize * 2];
+		E[] newElements = (E[]) new Object[capacity * 2];
 		
-		for (int i = 0; i < currentSize; i++) 
+		for (int i = 0; i < capacity; i++) 
 			newElements[i] = elements[i];
 		
 		elements = newElements;
@@ -73,28 +71,22 @@ public class ArrayList<E> implements List<E>{
 
 	@Override
 	public void add(int index, E elm) {
-		// TODO Auto-generated method stub
-		if(index < 0 || index > currentSize)
-			throw new ArrayIndexOutOfBoundsException("Index must be between 0 and size() - 1");
+		indexOutOfBound(index);
+			
+		if(size >= capacity) reAllocate();
 		
-		if(index == currentSize) {
-			add(elm);
-		}
-		
-		if(currentSize == elements.length) reAllocate();
-		
-		for(int i = currentSize; i >= index; i--) 
+		for(int i = size; i > index; i--) 
 			elements[i] = elements[i-1];
 		
 		elements[index] = elm;
-		currentSize++;
+		size++;
 	}
 
 	@Override
 	public boolean remove(E elm) {
 		int pos = -1;
 		
-		for(int i = 0; i < currentSize; i++) {
+		for(int i = 0; i < capacity; i++) {
 			if(elements[i].equals(elm)) {
 				pos = i;
 				break;
@@ -102,11 +94,11 @@ public class ArrayList<E> implements List<E>{
 		}
 		
 		if(pos >= 0) {
-			for(int i = pos; i < currentSize - 1; i++) {
+			for(int i = pos; i < capacity - 1; i++) {
 				elements[i] = elements[i+1];
 			}
-			currentSize--;
-			elements[currentSize] = null;
+			capacity--;
+			elements[capacity] = null;
 			return true;
 		}
 		
@@ -114,16 +106,15 @@ public class ArrayList<E> implements List<E>{
 	}
 
 	@Override
-	public boolean remove(int index) {
-		if(index < 0 || index >= currentSize)
-			throw new IndexOutOfBoundsException("Index must be [0, size())");
+	public E remove(int index) {
+		indexOutOfBound(index);
 		
-		for(int i = index; i < currentSize - 1; i++) {
-			elements[i] = elements[i+1];
+		E value = elements[index];
+		for(int i = index + 1 ; i < size ; i++) {
+			elements[i - 1] = elements[i];
 		}
-		currentSize--;
-		elements[currentSize] = null;
-		return true;
+		size--;
+		return value;
 	}
 
 	@Override
@@ -136,16 +127,15 @@ public class ArrayList<E> implements List<E>{
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < currentSize; i++) {
+		for (int i = 0; i < capacity; i++) {
 			elements[i] = null;
 		}
-		currentSize = 0;
+		size = 0;
 	}
 
 	@Override
 	public boolean contains(E elm) {
-		for(int i = 0; i < currentSize; i++) {
+		for(int i = 0; i < capacity; i++) {
 			if(elements[i].equals(elm)) {
 				return true;
 			}
@@ -155,8 +145,7 @@ public class ArrayList<E> implements List<E>{
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return currentSize;
+		return size;
 	}
 
 	@Override
@@ -167,21 +156,19 @@ public class ArrayList<E> implements List<E>{
 	@Override
 	public E last() {
 		if(isEmpty()) return null;
-		return elements[currentSize - 1];
+		return elements[capacity - 1];
 	}
 
 	@Override
 	public E get(int index) {
-		if(index < 0 || index >= currentSize)
-			throw new IndexOutOfBoundsException("Index must be 0 and size())");		
+		indexOutOfBound(index);
 		
 		return elements[index];
 	}
 
 	@Override
 	public E set(int index, E elm) {
-		if(index < 0 || index >= currentSize)
-			throw new IndexOutOfBoundsException("Index must be 0 and size())");	
+		indexOutOfBound(index);
 		E value = elements[index];
 		elements[index] = elm;
 		return value;
@@ -189,7 +176,7 @@ public class ArrayList<E> implements List<E>{
 
 	@Override
 	public int firstIndexOf(E elm) {
-		for(int i = 0; i < currentSize; i++) {
+		for(int i = 0; i < capacity; i++) {
 			if(elements[i].equals(elm)) {
 				return i;
 			}
@@ -199,7 +186,7 @@ public class ArrayList<E> implements List<E>{
 
 	@Override
 	public int lastIndexOf(E elm) {
-		for(int i = currentSize - 1; i >= 0; i--) {
+		for(int i = capacity - 1; i >= 0; i--) {
 			if(elements[i].equals(elm)) {
 				return i;
 			}
@@ -216,18 +203,24 @@ public class ArrayList<E> implements List<E>{
 	public Iterator<E> iterator() {
 		return new ArrayListIterator<>();
 	}
+	private void indexOutOfBound(int index) {
+		if (index < 0 || index > size) {
+			throw new IndexOutOfBoundsException(index);
+		}
+	}
 	
 	public String toString() {
-		String s = "";
-		
-		for(Object e: this.elements) {
-			if(e == null) break;
-			s += e.toString();
-			s += ", ";
+		String value = "[";
+		for (int i = 0; i < size; i++) {
+			if (i == size - 1) {
+				value += elements[i];
+			}
+			else {
+				value += elements[i] + ",";
+			}
 		}
-		return "[" + s + "]";
-		
-		
+		value += "]";
+		return value;
 	}
 	
 	
